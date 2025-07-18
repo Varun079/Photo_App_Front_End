@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 const ImageUploadPage = ({ onUploadSuccess }) => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [desc, setDesc] = useState("");
 
   const handleChange = (e) => {
     const file = e.target.files[0];
@@ -19,9 +20,10 @@ const ImageUploadPage = ({ onUploadSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!image) return;
+    if (!image || !desc.trim()) return;
     const data = new FormData();
     data.append('image', image);
+    data.append('desc', desc);
 
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/image`, {
       method: 'POST',
@@ -34,6 +36,7 @@ const ImageUploadPage = ({ onUploadSuccess }) => {
     }
     setImage(null);
     setPreview(null);
+    setDesc("");
   };
 
   return (
@@ -55,6 +58,19 @@ const ImageUploadPage = ({ onUploadSuccess }) => {
             {image && (
               <span className="text-sm text-gray-700 mt-1">Selected: {image.name}</span>
             )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="desc" className="text-gray-600">2. Description <span style={{color: 'red'}}>*</span></label>
+            <input
+              type="text"
+              id="desc"
+              name="desc"
+              required
+              value={desc}
+              onChange={e => setDesc(e.target.value)}
+              className="border rounded px-2 py-1"
+              placeholder="Describe the image (e.g. 'A man in a car')"
+            />
           </div>
           {preview && (
             <div className="flex flex-col items-center gap-2 border-t pt-4">
