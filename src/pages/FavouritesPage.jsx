@@ -3,6 +3,7 @@ import { useAppContext } from "../contexts/appContext";
 import { Navbar } from "../components/navbar";
 import { Sidebar } from "../components/Sidebar";
 import { ImageGrid } from "./HomePage";
+import ImageUploadPage from "./ImageUploadPage"; // Add import
 
 const FavouritesPage = () => {
   const { favourites, toggleLike } = useAppContext();
@@ -10,11 +11,12 @@ const FavouritesPage = () => {
   const [searchValue, setSearchValue] = useState("");
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
+  const [showUpload, setShowUpload] = useState(false); // Add upload modal state
 
   useEffect(() => {
     // Fetch all images, then filter by favourites
     const fetchImages = async () => {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/image`);
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/image`, { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         setItems(data.items ?? []);
@@ -31,7 +33,27 @@ const FavouritesPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(120deg, #18181b 0%, #23272f 100%)' }}>
-      <Navbar searchValue={searchValue} setSearchValue={setSearchValue} onUploadClick={() => {}} />
+      <Navbar searchValue={searchValue} setSearchValue={setSearchValue} onUploadClick={() => setShowUpload(true)} />
+      {showUpload && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.6)',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+          onClick={() => setShowUpload(false)}
+        >
+          <div onClick={e => e.stopPropagation()}>
+            <ImageUploadPage onUploadSuccess={() => { setShowUpload(false); window.location.reload(); }} />
+          </div>
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'row' }}>
         <Sidebar />
         <main style={{ flex: 1, padding: '32px 24px' }}>
