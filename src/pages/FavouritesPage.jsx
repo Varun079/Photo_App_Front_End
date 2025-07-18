@@ -4,10 +4,11 @@ import { Navbar } from "../components/navbar";
 import { Sidebar } from "../components/Sidebar";
 import { ImageGrid } from "./HomePage";
 import ImageUploadPage from "./ImageUploadPage";
+import { useImages } from '../hooks/useImages';
 
 const FavouritesPage = () => {
   const { favourites, toggleLike } = useAppContext();
-  const [items, setItems] = useState([]);
+  const { images: items, loading, error } = useImages();
   const [searchValue, setSearchValue] = useState("");
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
@@ -61,16 +62,22 @@ const FavouritesPage = () => {
       <div style={{ display: 'flex', flexDirection: 'row' }}>
         <Sidebar />
         <main style={{ flex: 1, padding: '32px 24px' }}>
-          <h1 style={{ color: '#fff', marginBottom: 24 }}>Favourites</h1>
-          {filteredItems.length === 0 ? (
-            <p style={{ color: '#fff' }}>No favourite images yet.</p>
-          ) : (
-            <ImageGrid
-              images={filteredItems}
-              onImageClick={(img, idx) => setFullscreenImage({ image: img, index: idx })}
-              favourites={favourites}
-              toggleLike={toggleLike}
-            />
+          {loading && <div style={{ color: '#fff', textAlign: 'center', marginTop: 40 }}>Loading images...</div>}
+          {error && <div style={{ color: 'red', textAlign: 'center', marginTop: 40 }}>Error: {error}</div>}
+          {!loading && !error && (
+            <>
+              <h1 style={{ color: '#fff', marginBottom: 24 }}>Favourites</h1>
+              {filteredItems.length === 0 ? (
+                <p style={{ color: '#fff' }}>No favourite images yet.</p>
+              ) : (
+                <ImageGrid
+                  images={filteredItems}
+                  onImageClick={(img, idx) => setFullscreenImage({ image: img, index: idx })}
+                  favourites={favourites}
+                  toggleLike={toggleLike}
+                />
+              )}
+            </>
           )}
         </main>
       </div>

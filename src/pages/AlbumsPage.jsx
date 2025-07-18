@@ -4,6 +4,7 @@ import { Navbar } from "../components/navbar";
 import { Sidebar } from "../components/Sidebar";
 import { ImageGrid } from "./HomePage";
 import ImageUploadPage from "./ImageUploadPage";
+import { useImages } from '../hooks/useImages';
 
 const CATEGORY_RULES = [
   {
@@ -48,23 +49,12 @@ function categorizeImage(img) {
 
 const AlbumsPage = () => {
   const { favourites, toggleLike } = useAppContext();
-  const [items, setItems] = useState([]);
+  const { images: items, loading, error } = useImages();
   const [searchValue, setSearchValue] = useState("");
   const [selectedAlbum, setSelectedAlbum] = useState(null);
   const [fullscreenImage, setFullscreenImage] = useState(null);
   const [showInfo, setShowInfo] = useState(false);
   const [showUpload, setShowUpload] = useState(false); // <-- add upload modal state
-
-  useEffect(() => {
-    const fetchImages = async () => {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/image`, { credentials: 'include' });
-      if (res.ok) {
-        const data = await res.json();
-        setItems(data.items ?? []);
-      }
-    };
-    fetchImages();
-  }, []);
 
   // Categorize images
   const albums = items.reduce((acc, img) => {
@@ -96,76 +86,82 @@ const AlbumsPage = () => {
       <div style={{ display: 'flex', flexDirection: 'row' }}>
         <Sidebar />
         <main style={{ flex: 1, padding: '32px 24px' }}>
-          <h1 style={{ color: '#fff', marginBottom: 24 }}>Albums</h1>
-          {showUpload && (
-            <div style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              background: 'rgba(0,0,0,0.6)',
-              zIndex: 2000,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-              onClick={() => setShowUpload(false)}
-            >
-              <div onClick={e => e.stopPropagation()}>
-                {/* Import and use your ImageUploadPage component here */}
-                <ImageUploadPage onUploadSuccess={() => { setShowUpload(false); window.location.reload(); }} />
-              </div>
-            </div>
-          )}
-          {!selectedAlbum ? (
-            <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
-              {Object.keys(albums).length === 0 && <p style={{ color: '#fff' }}>No albums found.</p>}
-              {Object.keys(albums).map(album => (
-                <div
-                  key={album}
-                  style={{
-                    background: '#23272f',
-                    color: '#fff',
-                    borderRadius: 12,
-                    padding: '32px 48px',
-                    minWidth: 180,
-                    minHeight: 120,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 22,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-                    transition: 'background 0.2s',
-                  }}
-                  onClick={() => setSelectedAlbum(album)}
-                >
-                  {album}
-                  <div style={{ fontSize: 14, fontWeight: 400, marginTop: 8, color: '#aaa' }}>{albums[album].length} images</div>
-                </div>
-              ))}
-            </div>
-          ) : (
+          {loading && <div style={{ color: '#fff', textAlign: 'center', marginTop: 40 }}>Loading images...</div>}
+          {error && <div style={{ color: 'red', textAlign: 'center', marginTop: 40 }}>Error: {error}</div>}
+          {!loading && !error && (
             <>
-              <button
-                style={{ marginBottom: 24, background: '#23272f', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', cursor: 'pointer', fontWeight: 500 }}
-                onClick={() => setSelectedAlbum(null)}
-              >
-                ← Back to Albums
-              </button>
-              <h2 style={{ color: '#fff', marginBottom: 16 }}>{selectedAlbum} ({filteredImages.length} images)</h2>
-              {filteredImages.length === 0 ? (
-                <p style={{ color: '#fff' }}>No images in this album.</p>
+              <h1 style={{ color: '#fff', marginBottom: 24 }}>Albums</h1>
+              {showUpload && (
+                <div style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100vw',
+                  height: '100vh',
+                  background: 'rgba(0,0,0,0.6)',
+                  zIndex: 2000,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                  onClick={() => setShowUpload(false)}
+                >
+                  <div onClick={e => e.stopPropagation()}>
+                    {/* Import and use your ImageUploadPage component here */}
+                    <ImageUploadPage onUploadSuccess={() => { setShowUpload(false); window.location.reload(); }} />
+                  </div>
+                </div>
+              )}
+              {!selectedAlbum ? (
+                <div style={{ display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+                  {Object.keys(albums).length === 0 && <p style={{ color: '#fff' }}>No albums found.</p>}
+                  {Object.keys(albums).map(album => (
+                    <div
+                      key={album}
+                      style={{
+                        background: '#23272f',
+                        color: '#fff',
+                        borderRadius: 12,
+                        padding: '32px 48px',
+                        minWidth: 180,
+                        minHeight: 120,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: 22,
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                        transition: 'background 0.2s',
+                      }}
+                      onClick={() => setSelectedAlbum(album)}
+                    >
+                      {album}
+                      <div style={{ fontSize: 14, fontWeight: 400, marginTop: 8, color: '#aaa' }}>{albums[album].length} images</div>
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <ImageGrid
-                  images={filteredImages}
-                  onImageClick={(img, idx) => setFullscreenImage({ image: img, index: idx })}
-                  favourites={favourites}
-                  toggleLike={toggleLike}
-                />
+                <>
+                  <button
+                    style={{ marginBottom: 24, background: '#23272f', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 18px', cursor: 'pointer', fontWeight: 500 }}
+                    onClick={() => setSelectedAlbum(null)}
+                  >
+                    ← Back to Albums
+                  </button>
+                  <h2 style={{ color: '#fff', marginBottom: 16 }}>{selectedAlbum} ({filteredImages.length} images)</h2>
+                  {filteredImages.length === 0 ? (
+                    <p style={{ color: '#fff' }}>No images in this album.</p>
+                  ) : (
+                    <ImageGrid
+                      images={filteredImages}
+                      onImageClick={(img, idx) => setFullscreenImage({ image: img, index: idx })}
+                      favourites={favourites}
+                      toggleLike={toggleLike}
+                    />
+                  )}
+                </>
               )}
             </>
           )}
