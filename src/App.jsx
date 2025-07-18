@@ -20,7 +20,7 @@ const App = () => {
     if (appLoading) {
         return (
             <div className="min-h-[100vh] flex flex-col items-center justify-center gap-10 content-center">
-                <BounceLoader size="175" color="#2020ff" />
+                <BounceLoader size="175px" color="#2020ff" />
                 <div className="border-1 border-lime-800 p-8 rounded-lg">
                     <p>Please note:</p>
                     <p>Backend is hosted on free server</p>
