@@ -17,7 +17,9 @@ const HomePage = () => {
 
   // Fetch images from backend on mount or after upload
   const fetchImages = async () => {
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/image`); // use VITE_BACKEND_URL
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/image`, {
+      credentials: 'include', // <-- ensure cookies are sent
+    }); // use VITE_BACKEND_URL
     if (res.ok) {
       const data = await res.json();
       setItems(data.items ?? []);
@@ -65,6 +67,7 @@ const HomePage = () => {
     if (!window.confirm('Are you sure you want to delete this image?')) return;
     await fetch(`${import.meta.env.VITE_BACKEND_URL}/image/${imageId}`, {
       method: 'DELETE',
+      credentials: 'include', // <-- ensure cookies are sent
     });
     setFullscreenImage(null);
     fetchImages();
@@ -95,7 +98,7 @@ const HomePage = () => {
   // Try to get file size from Content-Length header
   useEffect(() => {
     if (fullscreenImage) {
-      fetch(`${import.meta.env.VITE_BACKEND_URL}/image/${fullscreenImage.image._id}/raw`, { method: 'HEAD' })
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/image/${fullscreenImage.image._id}/raw`, { method: 'HEAD', credentials: 'include' })
         .then(res => {
           const size = res.headers.get('Content-Length');
           setImgMeta(meta => ({ ...meta, size: size ? Number(size) : null }));
