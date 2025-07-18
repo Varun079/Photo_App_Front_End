@@ -36,9 +36,8 @@ const CATEGORY_RULES = [
 
 function categorizeImage(img) {
   const desc = (img.desc || "").toLowerCase();
-  const words = desc.split(/\W+/); // split on non-word characters
   for (const cat of CATEGORY_RULES) {
-    if (cat.keywords.some(word => words.includes(word))) {
+    if (cat.keywords.some(word => desc.includes(word))) {
       console.log(`Image "${img.name}" desc: "${desc}" => Category: ${cat.name}`);
       return cat.name;
     }
