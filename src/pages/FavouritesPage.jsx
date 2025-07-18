@@ -13,20 +13,21 @@ const FavouritesPage = () => {
   const [showInfo, setShowInfo] = useState(false);
   const [showUpload, setShowUpload] = useState(false); // Add upload modal state
 
+  // Refetch images when favourites change or after upload
+  const fetchImages = async () => {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/image`, { credentials: 'include' });
+    if (res.ok) {
+      const data = await res.json();
+      setItems(data.items ?? []);
+      // Debugging logs
+      console.log('Fetched images:', data.items);
+      console.log('Current favourites:', favourites);
+    }
+  };
+
   useEffect(() => {
-    // Fetch all images, then filter by favourites
-    const fetchImages = async () => {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/image`, { credentials: 'include' });
-      if (res.ok) {
-        const data = await res.json();
-        setItems(data.items ?? []);
-        // Debugging logs
-        console.log('Fetched images:', data.items);
-        console.log('Current favourites:', favourites);
-      }
-    };
     fetchImages();
-  }, []);
+  }, [favourites]);
 
   const filteredItems = items.filter(img => favourites.includes(img._id) && (
     !searchValue.trim() ||
@@ -53,7 +54,7 @@ const FavouritesPage = () => {
           onClick={() => setShowUpload(false)}
         >
           <div onClick={e => e.stopPropagation()}>
-            <ImageUploadPage onUploadSuccess={() => { setShowUpload(false); window.location.reload(); }} />
+            <ImageUploadPage onUploadSuccess={() => { setShowUpload(false); fetchImages(); }} />
           </div>
         </div>
       )}
