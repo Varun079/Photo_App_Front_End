@@ -75,4 +75,4 @@ const ImageUploadPage = ({ onUploadSuccess }) => {
   );
 };
 
-export { ImageUploadPage };
+export default ImageUploadPage;

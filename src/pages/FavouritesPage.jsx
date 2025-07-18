@@ -3,7 +3,7 @@ import { useAppContext } from "../contexts/appContext";
 import { Navbar } from "../components/navbar";
 import { Sidebar } from "../components/Sidebar";
 import { ImageGrid } from "./HomePage";
-import ImageUploadPage from "./ImageUploadPage"; // Add import
+import ImageUploadPage from "./ImageUploadPage";
 
 const FavouritesPage = () => {
   const { favourites, toggleLike } = useAppContext();
@@ -20,6 +20,9 @@ const FavouritesPage = () => {
       if (res.ok) {
         const data = await res.json();
         setItems(data.items ?? []);
+        // Debugging logs
+        console.log('Fetched images:', data.items);
+        console.log('Current favourites:', favourites);
       }
     };
     fetchImages();

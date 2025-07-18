@@ -3,7 +3,7 @@ import { useAppContext } from "../contexts/appContext";
 import { Navbar } from "../components/navbar";
 import { Sidebar } from "../components/Sidebar";
 import { ImageGrid } from "./HomePage";
-import ImageUploadPage from "./ImageUploadPage"; // Added import for ImageUploadPage
+import ImageUploadPage from "./ImageUploadPage";
 
 const CATEGORY_RULES = [
   {
@@ -38,9 +38,11 @@ function categorizeImage(img) {
   const desc = (img.desc || "").toLowerCase();
   for (const cat of CATEGORY_RULES) {
     if (cat.keywords.some(word => desc.includes(word))) {
+      console.log(`Image "${img.name}" desc: "${desc}" => Category: ${cat.name}`);
       return cat.name;
     }
   }
+  console.log(`Image "${img.name}" desc: "${desc}" => Category: Other`);
   return "Other";
 }
 
